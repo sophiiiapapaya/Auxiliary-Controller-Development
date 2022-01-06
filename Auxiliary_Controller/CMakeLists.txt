@@ -7,7 +7,6 @@ set(CMAKE_CXX_STANDARD 17)
 
 # initalize pico_sdk from installed location
 # (note this can come from environment, CMake cache etc)
-set(PICO_SDK_PATH "C:/Users/jcarl/Desktop/UCR SUAS/Pico Development/pico-sdk")
 include(pico_sdk_import.cmake)
 
 project(Auxiliary_Controller C CXX ASM)
