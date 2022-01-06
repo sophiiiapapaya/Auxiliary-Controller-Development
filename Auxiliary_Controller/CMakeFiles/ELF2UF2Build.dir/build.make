@@ -81,7 +81,7 @@ elf2uf2\src\ELF2UF2Build-stamp\ELF2UF2Build-install: elf2uf2\src\ELF2UF2Build-st
 
 elf2uf2\src\ELF2UF2Build-stamp\ELF2UF2Build-mkdir:
 	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --blue --bold --progress-dir=C:\Users\jcarl\Documents\GitHub\Auxiliary-Controller-Development\Auxiliary_Controller\CMakeFiles --progress-num=$(CMAKE_PROGRESS_3) "Creating directories for 'ELF2UF2Build'"
-	echo >nul && "C:\Program Files\CMake\bin\cmake.exe" -E make_directory C:/Users/jcarl/Documents/GitHub/Auxiliary-Controller-Development/Auxiliary_Controller/pico-sdk/tools/elf2uf2
+	echo >nul && "C:\Program Files\CMake\bin\cmake.exe" -E make_directory "C:/Users/jcarl/Desktop/UCR SUAS/Pico Development/pico-sdk/tools/elf2uf2"
 	echo >nul && "C:\Program Files\CMake\bin\cmake.exe" -E make_directory C:/Users/jcarl/Documents/GitHub/Auxiliary-Controller-Development/Auxiliary_Controller/elf2uf2
 	echo >nul && "C:\Program Files\CMake\bin\cmake.exe" -E make_directory C:/Users/jcarl/Documents/GitHub/Auxiliary-Controller-Development/Auxiliary_Controller/elf2uf2
 	echo >nul && "C:\Program Files\CMake\bin\cmake.exe" -E make_directory C:/Users/jcarl/Documents/GitHub/Auxiliary-Controller-Development/Auxiliary_Controller/elf2uf2/tmp
@@ -109,7 +109,7 @@ elf2uf2\src\ELF2UF2Build-stamp\ELF2UF2Build-configure: elf2uf2\tmp\ELF2UF2Build-
 elf2uf2\src\ELF2UF2Build-stamp\ELF2UF2Build-configure: elf2uf2\src\ELF2UF2Build-stamp\ELF2UF2Build-patch
 	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --blue --bold --progress-dir=C:\Users\jcarl\Documents\GitHub\Auxiliary-Controller-Development\Auxiliary_Controller\CMakeFiles --progress-num=$(CMAKE_PROGRESS_7) "Performing configure step for 'ELF2UF2Build'"
 	cd C:\Users\jcarl\Documents\GitHub\Auxiliary-Controller-Development\Auxiliary_Controller\elf2uf2
-	echo >nul && "C:\Program Files\CMake\bin\cmake.exe" "-GNMake Makefiles" C:/Users/jcarl/Documents/GitHub/Auxiliary-Controller-Development/Auxiliary_Controller/pico-sdk/tools/elf2uf2
+	echo >nul && "C:\Program Files\CMake\bin\cmake.exe" "-GNMake Makefiles" "C:/Users/jcarl/Desktop/UCR SUAS/Pico Development/pico-sdk/tools/elf2uf2"
 	echo >nul && "C:\Program Files\CMake\bin\cmake.exe" -E touch C:/Users/jcarl/Documents/GitHub/Auxiliary-Controller-Development/Auxiliary_Controller/elf2uf2/src/ELF2UF2Build-stamp/ELF2UF2Build-configure
 	cd C:\Users\jcarl\Documents\GitHub\Auxiliary-Controller-Development\Auxiliary_Controller
 

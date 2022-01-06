@@ -1,7 +1,2 @@
-Auxiliary_Controller/build/pico-sdk/
-*.obj
-*.map
-*.hex
-*.uf2
-*.elf
-Auxiliary_Controller/pico-sdk/
+Auxiliary_Controller/build/*
+Auxiliary_Controller/pico_sdk_import.cmake
