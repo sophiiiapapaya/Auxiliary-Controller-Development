@@ -1,8 +1,10 @@
 # Auxiliary-Controller-Development
 
+These directions assume you have performed the toolchain installation in chapter 9 of [the getting started guide](https://datasheets.raspberrypi.com/pico/getting-started-with-pico.pdf) for your operating system.
+
 # Preparing the SDK
-1. After cloning/downloading this repository to your computer, run the following command in the base directory of the local copy
-    git submodule update --init --recursive
+1. After cloning/downloading this repository to your computer, download the pico SDK [here](https://github.com/raspberrypi/pico-sdk) and place it in a separate directory
+2. Within the pico SDK, go to the external folder and copy the file pico_sdk_import to the Auxiliary_Controller folder in this repository
 
 # Directions for Building Code
 1. Run the following command from within the Auxiliary_Controller/build directory
