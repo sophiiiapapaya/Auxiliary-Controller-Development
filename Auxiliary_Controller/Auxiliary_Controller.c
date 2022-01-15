@@ -25,13 +25,6 @@ void gpioControl(int gpioNum, bool offOn) {
 }
 
 
-//line 16: user inputs GPIO pin, int, and wheter they want to open channel, bool.
-//line 17: checks if GPIO pin is a valid pin
-//line 18: turns on/off the gpio pin depending on what the user wants, through bool parameter.
-//line 19: wait 101 ms for physical delay
-//line 20: updates global variable with dir direction, 1 for out, 0 for in.
-//line 23: if an invalid pin is inputed, the global variable is set to -1 to indicate an error.
-
 int main()
 {
     stdio_init_all();
