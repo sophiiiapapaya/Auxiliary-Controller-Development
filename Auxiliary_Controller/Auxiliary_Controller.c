@@ -8,8 +8,8 @@
 
 //initialize relayState to false
 bool relayState = false;
-int GPIO4 = 4;
-int GPIO5 = 5;
+uint GPIO4 = 4;
+uint GPIO5 = 5;
 
 //pages 115 & 118
 //function switches on and off GPIO pin 4 & 5
@@ -32,6 +32,8 @@ void relayControl(bool openClose) {
 int main()
 {
     stdio_init_all();
+      gpio_init(GPIO4);
+      gpio_init(GPIO5);
 
 
     // Timer example code - This example fires off the callback after 2000ms
