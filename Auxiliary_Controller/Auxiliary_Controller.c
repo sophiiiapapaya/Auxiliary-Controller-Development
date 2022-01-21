@@ -7,7 +7,7 @@
 #include "hardware/clocks.h"
 
 
-bool relayState = false;
+bool relayState = true;
 uint GPIO4 = 4;
 uint GPIO5 = 5;
 
