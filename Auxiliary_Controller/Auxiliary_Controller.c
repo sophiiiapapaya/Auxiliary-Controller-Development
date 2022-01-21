@@ -13,15 +13,15 @@ int64_t alarm_callback(alarm_id_t id, void *user_data) {
     return 0;
 }
 
-void gpioControl(int gpioNum, bool offOn) {
-  if(gpioNum > 0 && gpioNum < 35 && gpioNum != 3 && gpioNum != 8 && gpioNum != 13 && gpioNum != 18 && gpioNum != 23 && gpioNum != 28 && gpioNum != 33){
-      gpio_set_dir(gpioNumber, offOn);
+void relayControl(bool openClose) {
+      int GPIO4 = 4;
+      int GPIO5 = 5;
+      gpio_put(GPIO4, openClose);
+      gpio_put(GPIO5, !openClose);
       sleep_ms(101);
-      relayState = gpio_get_dir(gpioNumber);
-  }
-  else{
-    relayState = -1;
-  }
+      gpio_put(GPIO4, !openClose);
+      gpio_put(GPIO5, openClose);
+      relayState = gpio_get(GPIO4);
 }
 
 
