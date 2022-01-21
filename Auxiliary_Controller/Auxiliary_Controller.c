@@ -6,7 +6,7 @@
 #include "hardware/watchdog.h"
 #include "hardware/clocks.h"
 
-//initialize relayState to false
+
 bool relayState = false;
 uint GPIO4 = 4;
 uint GPIO5 = 5;
