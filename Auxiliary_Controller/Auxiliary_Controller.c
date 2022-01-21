@@ -6,14 +6,16 @@
 #include "hardware/watchdog.h"
 #include "hardware/clocks.h"
 
-ubool relayState = relayState;
+//initialize relayState to false
+bool relayState = false;
+int GPIO4 = 4;
+int GPIO5 = 5;
 
 //pages 115 & 118
 //function switches on and off GPIO pin 4 & 5
 //takes in a bool value to determine which pin is open and closed to start
 void relayControl(bool openClose) {
-      int GPIO4 = 4;
-      int GPIO5 = 5;
+
       //sets GPIO pins to initial position
       gpio_put(GPIO4, openClose);
       gpio_put(GPIO5, !openClose);
