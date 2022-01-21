@@ -32,17 +32,11 @@ void relayControl(bool openClose) {
 int main()
 {
     stdio_init_all();
-      gpio_init(GPIO4);
-      gpio_init(GPIO5);
-
-
-    // Timer example code - This example fires off the callback after 2000ms
-    add_alarm_in_ms(2000, alarm_callback, NULL, false);
-
-    while (1) {
-        puts("Hello World\n");
-        sleep_ms(1000);
-    }
+    gpio_init(GPIO4);
+    gpio_init(GPIO5);
+      
+    gpio_set_dir(GPIO4, true);
+    gpio_set_dir(GPIO5, false);
 
     return 0;
 }
