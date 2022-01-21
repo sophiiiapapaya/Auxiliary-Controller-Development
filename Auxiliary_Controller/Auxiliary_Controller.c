@@ -8,13 +8,9 @@
 
 uint relayState = relayState;
 
-int64_t alarm_callback(alarm_id_t id, void *user_data) {
-    // Put your timeout handler code in here
-    return 0;
-}
-
+//pages 115 & 118
 //function switches on and off GPIO pin 4 & 5
-//Takes in a bool value to determine which pin is open and closed to start
+//takes in a bool value to determine which pin is open and closed to start
 void relayControl(bool openClose) {
       int GPIO4 = 4;
       int GPIO5 = 5;
