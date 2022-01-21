@@ -6,7 +6,7 @@
 #include "hardware/watchdog.h"
 #include "hardware/clocks.h"
 
-uint relayState = relayState;
+ubool relayState = relayState;
 
 //pages 115 & 118
 //function switches on and off GPIO pin 4 & 5
@@ -22,8 +22,8 @@ void relayControl(bool openClose) {
       //switches which pins are open and closed
       gpio_put(GPIO4, !openClose);
       gpio_put(GPIO5, openClose);
-      //sets relay state to the state of GPIO pin 4
-      relayState = gpio_get(GPIO4);
+      //sets relay state to openClose
+      relayState = openClose;
 }
 
 
