@@ -13,14 +13,20 @@ int64_t alarm_callback(alarm_id_t id, void *user_data) {
     return 0;
 }
 
+//function switches on and off GPIO pin 4 & 5
+//Takes in a bool value to determine which pin is open and closed to start
 void relayControl(bool openClose) {
       int GPIO4 = 4;
       int GPIO5 = 5;
+      //sets GPIO pins to initial position
       gpio_put(GPIO4, openClose);
       gpio_put(GPIO5, !openClose);
+     //delay for 101 ms
       sleep_ms(101);
+      //switches which pins are open and closed
       gpio_put(GPIO4, !openClose);
       gpio_put(GPIO5, openClose);
+      //sets relay state to the state of GPIO pin 4
       relayState = gpio_get(GPIO4);
 }
 
