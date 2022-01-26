@@ -8,22 +8,31 @@
 
 
 bool relayState = true;
-uint GPIO4 = 4;
-uint GPIO5 = 5;
+uint turnRelayOnPin = 4;
+uint turnRelayOffPin = 5;
 
 //pages 115 & 118
 //function switches on and off GPIO pin 4 & 5
-//takes in a bool value to determine which pin is open and closed to start
+//takes in a bool value to determine whether relay is open and closed to start
 void relayControl(bool openClose) {
 
       //sets GPIO pins to initial position
-      gpio_put(GPIO4, openClose);
-      gpio_put(GPIO5, !openClose);
+      if(openClose)
+      {
+      gpio_put(turnRelayOnPin, openClose);
      //delay for 101 ms
       sleep_ms(101);
       //switches which pins are open and closed
-      gpio_put(GPIO4, !openClose);
-      gpio_put(GPIO5, openClose);
+      gpio_put(turnRelayOnPin, !openClose);
+      }
+      else
+      {
+      gpio_put(turnRelayOffPin, openClose);
+      //delay for 101 ms
+      sleep_ms(101);
+      //switches which pins are open and closed
+      gpio_put(turnRelayOffPin, !openClose);
+      }
       //sets relay state to openClose
       relayState = openClose;
 }
@@ -32,11 +41,14 @@ void relayControl(bool openClose) {
 int main()
 {
     stdio_init_all();
-    gpio_init(GPIO4);
-    gpio_init(GPIO5);
+    gpio_init(turnRelayOnPin);
+    gpio_init(turnRelayOffPin);
       
-    gpio_set_dir(GPIO4, true);
-    gpio_set_dir(GPIO5, false);
+    gpio_set_dir(turnRelayOnPin, true);
+    gpio_set_dir(turnRelayOffPin, true);
+    
+    stdio_usb_init();
+    
 
     return 0;
 }
