@@ -37,6 +37,11 @@ void relayControl(bool openClose) {
       relayState = openClose;
 }
 
+bool relayState()
+{
+      return relayState;
+}
+
 
 int main()
 {
@@ -49,6 +54,11 @@ int main()
     
     stdio_usb_init();
     
+    relayControl(true);
+    cout << "Relay Control set true: " << relayState();
+      
+    relayControl(false);
+    cout << "Relay Control set true: " << relayState();
 
     return 0;
 }
