@@ -319,10 +319,10 @@
 				},
 				{
 					"name" : "HELPSTRING",
-					"value" : "CXX compiler"
+					"value" : "No help, variable specified on the command line."
 				}
 			],
-			"type" : "STRING",
+			"type" : "FILEPATH",
 			"value" : "C:/Program Files (x86)/GNU Arm Embedded Toolchain/10 2021.10/bin/arm-none-eabi-g++.exe"
 		},
 		{
@@ -447,10 +447,10 @@
 				},
 				{
 					"name" : "HELPSTRING",
-					"value" : "C compiler"
+					"value" : "No help, variable specified on the command line."
 				}
 			],
-			"type" : "STRING",
+			"type" : "FILEPATH",
 			"value" : "C:/Program Files (x86)/GNU Arm Embedded Toolchain/10 2021.10/bin/arm-none-eabi-gcc.exe"
 		},
 		{
@@ -1491,7 +1491,7 @@
 				}
 			],
 			"type" : "INTERNAL",
-			"value" : " C:/Users/jcarl/Desktop/UCR SUAS/Pico Development/pico-sdk/src/rp2_common/cmsis C:/Users/jcarl/Desktop/UCR SUAS/Pico Development/pico-sdk/src/rp2040/hardware_regs"
+			"value" : " C:/Users/jcarl/Desktop/UCR SUAS/Pico Development/pico-sdk/src/rp2_common/cmsis C:/Users/jcarl/Desktop/UCR SUAS/Pico Development/pico-sdk/src/rp2040/hardware_regs C:/Users/jcarl/Desktop/UCR SUAS/Pico Development/pico-sdk/src/rp2_common/cmsis C:/Users/jcarl/Desktop/UCR SUAS/Pico Development/pico-sdk/src/rp2040/hardware_regs"
 		},
 		{
 			"name" : "PICO_DOXYGEN_PATHS",

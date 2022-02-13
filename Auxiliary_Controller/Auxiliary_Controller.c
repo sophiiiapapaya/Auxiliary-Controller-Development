@@ -44,6 +44,7 @@ void relayControl(bool openClose) {
 void unitTest_Relay() {
     relayControl(true);
     printf("Relay Control set true: %d", relayState);
+    sleep_ms(500);
 
     while (gpio_get(testingSwitchPin));
 
@@ -63,14 +64,14 @@ int main()
     gpio_set_dir(testingSwitchPin, false);
 
     stdio_usb_init();
-
-    puts("Begin");
     
     while (gpio_get(testingSwitchPin));
 
     unitTest_Relay();
 
-    while(true);
+    while(true) {
+        sleep_ms(100);
+    }
 
     return 0;
 }
