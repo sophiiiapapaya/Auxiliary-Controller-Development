@@ -8,8 +8,12 @@
 
 
 bool relayState = true;
-uint turnRelayOnPin = 4;
-uint turnRelayOffPin = 5;
+// OUT1 pin on the H-bridge connects to pin 4 on the relay
+// OUT2 pin on the H-bridge connects to pin 3 on the relay
+const uint turnRelayOnPin = 4; // Connects to IN1 pin on the H-bridge
+const uint turnRelayOffPin = 5; // Connects to IN2 pin on the H-bridge
+
+const uint testingSwitchPin = 26;
 
 //pages 115 & 118
 //function switches on and off GPIO pin 4 & 5
@@ -37,28 +41,36 @@ void relayControl(bool openClose) {
       relayState = openClose;
 }
 
-bool relayState()
-{
-      return relayState;
-}
+void unitTest_Relay() {
+    relayControl(true);
+    printf("Relay Control set true: %d", relayState);
 
+    while (gpio_get(testingSwitchPin));
+
+    relayControl(false);
+    printf("Relay Control set true: %d", relayState);
+}
 
 int main()
 {
     stdio_init_all();
     gpio_init(turnRelayOnPin);
     gpio_init(turnRelayOffPin);
+    gpio_init(testingSwitchPin);
       
     gpio_set_dir(turnRelayOnPin, true);
     gpio_set_dir(turnRelayOffPin, true);
-    
+    gpio_set_dir(testingSwitchPin, false);
+
     stdio_usb_init();
+
+    puts("Begin");
     
-    relayControl(true);
-    cout << "Relay Control set true: " << relayState();
-      
-    relayControl(false);
-    cout << "Relay Control set true: " << relayState();
+    while (gpio_get(testingSwitchPin));
+
+    unitTest_Relay();
+
+    while(true);
 
     return 0;
 }
