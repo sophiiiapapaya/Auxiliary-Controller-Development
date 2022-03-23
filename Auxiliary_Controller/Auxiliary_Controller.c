@@ -1,3 +1,4 @@
+// When including header files from the SDK, make sure you add the corresponding entry to the target_link_libraries list in CMakeLists.txt
 #include <stdio.h>
 #include "pico/stdlib.h"
 #include "hardware/gpio.h"
