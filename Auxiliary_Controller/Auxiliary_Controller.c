@@ -6,7 +6,6 @@
 #include "hardware/watchdog.h"
 #include "hardware/clocks.h"
 
-
 bool relayState = true;
 // OUT1 pin on the H-bridge connects to pin 4 on the relay
 // OUT2 pin on the H-bridge connects to pin 3 on the relay
@@ -15,11 +14,32 @@ const uint turnRelayOffPin = 5; // Connects to IN2 pin on the H-bridge
 
 const uint testingSwitchPin = 26;
 
+void Relay_Init();
+void Relay_Control(bool openClose);
+void Relay_Unit_Test();
+
+int main() {
+    stdio_init_all();
+    stdio_usb_init();
+
+    while(true) {
+        sleep_ms(100);
+    }
+
+    return 0;
+}
+
+void Relay_Init() {
+    gpio_init(turnRelayOnPin);
+    gpio_init(turnRelayOffPin);
+    gpio_set_dir(turnRelayOffPin, true);
+    gpio_set_dir(testingSwitchPin, false);
+}
+
 //pages 115 & 118
 //function switches on and off GPIO pin 4 & 5
 //takes in a bool value to determine whether relay is open and closed to start
-void relayControl(bool openClose) {
-
+void Relay_Control(bool openClose) {
       //sets GPIO pins to initial position
       if(openClose)
       {
@@ -41,37 +61,15 @@ void relayControl(bool openClose) {
       relayState = openClose;
 }
 
-void unitTest_Relay() {
-    relayControl(true);
+void Relay_Unit_Test() {
+    while (gpio_get(testingSwitchPin));
+    
+    Relay_Control(true);
     printf("Relay Control set true: %d", relayState);
     sleep_ms(500);
 
     while (gpio_get(testingSwitchPin));
 
-    relayControl(false);
+    Relay_Control(false);
     printf("Relay Control set true: %d", relayState);
-}
-
-int main()
-{
-    stdio_init_all();
-    gpio_init(turnRelayOnPin);
-    gpio_init(turnRelayOffPin);
-    gpio_init(testingSwitchPin);
-      
-    gpio_set_dir(turnRelayOnPin, true);
-    gpio_set_dir(turnRelayOffPin, true);
-    gpio_set_dir(testingSwitchPin, false);
-
-    stdio_usb_init();
-    
-    while (gpio_get(testingSwitchPin));
-
-    unitTest_Relay();
-
-    while(true) {
-        sleep_ms(100);
-    }
-
-    return 0;
 }
