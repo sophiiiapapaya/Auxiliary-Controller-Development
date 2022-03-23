@@ -6,6 +6,7 @@
 #include "hardware/timer.h"
 #include "hardware/watchdog.h"
 #include "hardware/clocks.h"
+#include "hardware/pwm.h"
 
 bool relayState = true;
 // OUT1 pin on the H-bridge connects to pin 4 on the relay
