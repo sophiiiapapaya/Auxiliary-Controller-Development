@@ -22,7 +22,7 @@ void Relay_Unit_Test();
 
 // Code from Isean and Justin
 const uint pwmPinInput = 27; //This pin is a PWM 2B type
-// Try using pin 5 if 27 doesn't work
+// Results are accurate to within 0.001
 float measure_duty_cycle(uint gpio){
       // Only the PWM B pins can be used as inputs.
       assert(pwm_gpio_to_channel(gpio) == PWM_CHAN_B);//skips over function if pin is not pwm b 
@@ -51,7 +51,8 @@ int main() {
     stdio_usb_init();
 
     while(true) {
-        sleep_ms(100);
+        printf("%f\n",measure_duty_cycle(pwmPinInput));
+        sleep_ms(1000);
     }
 
     return 0;
