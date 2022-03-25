@@ -22,7 +22,6 @@ void Relay_Unit_Test();
 
 // Code from Isean and Justin
 // Only the PWM B pins can be used as inputs.
-const uint pwmPinInput = 27; //This pin is a PWM 2B type
 // Results are accurate to within 0.001
 /* float measure_duty_cycle(uint gpio){
       // Only the PWM B pins can be used as inputs.
@@ -47,7 +46,10 @@ const uint pwmPinInput = 27; //This pin is a PWM 2B type
 
 // Note: When the pwm signal stops, the pwm_count needs to be reset to zero
 
+// The default pwm frequency for an AUX channel on the Pixhawk is 50 Hz
+
 // Needs to be declared globally to be shared by multiple functions
+const uint pwmPinInput = 27; //This pin is a PWM 2B type
 uint slice_num;
 uint16_t pwm_count;
 
