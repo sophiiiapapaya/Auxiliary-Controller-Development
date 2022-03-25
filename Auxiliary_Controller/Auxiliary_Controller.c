@@ -44,39 +44,61 @@ void Relay_Unit_Test();
       return pwm_get_counter(slice_num) / max_possible_count;
 } */
 
-// Note: When the pwm signal stops, the pwm_count needs to be reset to zero
-
 // The default pwm frequency for an AUX channel on the Pixhawk is 50 Hz
+// Pulse width can be between 1000 us and 2000 us
+#define MIN_PULSE_WIDTH_US 1000
+#define MAX_PULSE_WIDTH_US 2000
 
 // Needs to be declared globally to be shared by multiple functions
 const uint pwmPinInput = 27; //This pin is a PWM 2B type
-uint slice_num;
-uint16_t pwm_count;
+volatile uint64_t last_rising_time_us;
+volatile uint64_t last_pulse_width_us;
+volatile bool pwm_active;
 
 void pwm_recv_callback(uint gpio, uint32_t events);
 int64_t pwm_measure_complete(alarm_id_t id, void *user_data);
 
-int64_t pwm_measure_complete(alarm_id_t id, void *user_data) {
-    // Save the count so that it can be used to calculate the duty cycle
-    pwm_count = pwm_get_counter(slice_num);
-    // Re-enable the interrupt so that the process can repeat
-    gpio_set_irq_enabled_with_callback(pwmPinInput, GPIO_IRQ_EDGE_RISE, true, pwm_recv_callback);
+int64_t pwm_active_check(alarm_id_t id, void *user_data) {
+    // If too much time has passed since the last rising edge and the pin is low, 
+        // then the signal must have stopped
+    if ((time_us_64() - last_rising_time_us > 20000) && !gpio_get(pwmPinInput)) {
+        pwm_active = false;
+    }
     return 0;
 }
 
 void pwm_recv_callback(uint gpio, uint32_t events) {
-    // Disable this interrupt while the count is taking place
+    last_rising_time_us = 0;
+    // Disable interrupts on this pin temporarily
     gpio_set_irq_enabled_with_callback(pwmPinInput, GPIO_IRQ_EDGE_RISE, false, pwm_recv_callback);
-    // Begin the counter that will be used to determine the duty cycle
-    // Some of this could be determined outside of the function to save time
-    pwm_config cfg = pwm_get_default_config();//intitialization
-    pwm_config_set_clkdiv_mode(&cfg, PWM_DIV_B_HIGH);
-    pwm_config_set_clkdiv(&cfg, 100);
-    pwm_init(slice_num, &cfg, false);
-    gpio_set_function(gpio, GPIO_FUNC_PWM);
-    pwm_set_enabled(slice_num, true);
-    // Set a timer for 10 ms so that the count can be read when it is ready
-    add_alarm_in_us(10000, pwm_measure_complete, NULL, false);
+    switch(events) {
+        case GPIO_IRQ_EDGE_RISE:
+            // Set flag to indicate a pwm signal is being received
+            if (!pwm_active) {
+                pwm_active = true;
+            }
+            // Save the current time to measure the pulse width
+            last_rising_time_us = time_us_64();
+            // Also start a timer that is greater than the period of the PWM signal to
+                // detect if the signal has stopped
+            add_alarm_in_us(21000, pwm_active_check, NULL, false);
+            // Set interrupt to trigger again on the falling edge of the pulse
+            gpio_set_irq_enabled_with_callback(pwmPinInput, GPIO_IRQ_EDGE_FALL, true, pwm_recv_callback);
+            break;
+        case GPIO_IRQ_EDGE_FALL:
+            // Get the time elapsed since the pulse began
+            last_pulse_width_us = time_us_64() - last_rising_time_us;
+            if (last_pulse_width_us < MIN_PULSE_WIDTH_US || last_pulse_width_us > MAX_PULSE_WIDTH_US) {
+                // ERROR
+            }
+            // Set interrupt to trigger on the rising edge of the next pulse
+            gpio_set_irq_enabled_with_callback(pwmPinInput, GPIO_IRQ_EDGE_RISE, true, pwm_recv_callback);
+            break;
+        default:
+            // ERROR
+            gpio_set_irq_enabled_with_callback(pwmPinInput, GPIO_IRQ_EDGE_RISE, true, pwm_recv_callback);
+            break;
+    }
 }
 
 int main() {
@@ -85,24 +107,19 @@ int main() {
 
     gpio_init(pwmPinInput);
     gpio_set_dir(pwmPinInput, false);
-    slice_num = pwm_gpio_to_slice_num(pwmPinInput);
-    pwm_count = 0;
+    last_rising_time_us = 0;
+    last_pulse_width_us = 0;
+    pwm_active = false;
     // Set interrupt on rising edge
     gpio_set_irq_enabled_with_callback(pwmPinInput, GPIO_IRQ_EDGE_RISE, true, pwm_recv_callback);
 
-    float counting_rate = clock_get_hz(clk_sys) / 100;
-    float max_possible_count = counting_rate * 0.01;
     while(true) {
-        printf("%f\n", pwm_count/max_possible_count);
-        sleep_ms(1000);
+        printf("Last pulse width: %d\n", last_pulse_width_us);
+        printf(pwm_active ? "Active" : "Not active");
+        printf("\n");
+        busy_wait_us(100000);
     }
 
-    /*
-    while(true) {
-        printf("%f\n",measure_duty_cycle(pwmPinInput));
-        sleep_ms(1000);
-    }
-    */
     return 0;
 }
 
