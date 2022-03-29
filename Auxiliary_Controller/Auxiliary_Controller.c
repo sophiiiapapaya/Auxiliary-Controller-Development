@@ -19,6 +19,15 @@ void Relay_Init();
 void Relay_Control(bool openClose);
 void Relay_Unit_Test();
 
+//// Put code for status LEDs here
+const uint program_status_LED_pin = 6; // placeholder value
+const uint relay_status_LED_pin = 7; // placeholder value
+bool unresolved_error = false;
+
+// Function definitions here
+
+////
+
 int main() {
     stdio_init_all();
     stdio_usb_init();
