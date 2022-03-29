@@ -72,5 +72,5 @@ void Relay_Unit_Test() {
     while (gpio_get(testingSwitchPin));
 
     Relay_Control(false);
-    printf("Relay Control set true: %d", relayState);
+    printf("Relay Control set false: %d", relayState);
 }
