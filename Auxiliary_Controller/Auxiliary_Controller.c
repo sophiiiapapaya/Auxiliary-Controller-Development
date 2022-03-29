@@ -7,6 +7,8 @@
 #include "hardware/watchdog.h"
 #include "hardware/clocks.h"
 
+#include "headers/gcs_messages.h"
+
 bool relayState = true;
 // OUT1 pin on the H-bridge connects to pin 4 on the relay
 // OUT2 pin on the H-bridge connects to pin 3 on the relay

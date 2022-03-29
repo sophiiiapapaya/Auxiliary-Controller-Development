@@ -1,3 +1,7 @@
 {
-    "cmake.sourceDirectory": "${workspaceFolder}/Auxiliary_Controller"
+    "cmake.sourceDirectory": "${workspaceFolder}/Auxiliary_Controller",
+    "files.associations": {
+        "stdio.h": "c",
+        "gcs_messages.h": "c"
+    }
 }
