@@ -58,6 +58,7 @@ volatile bool pwm_active;
 void pwm_recv_callback(uint gpio, uint32_t events);
 int64_t pwm_measure_complete(alarm_id_t id, void *user_data);
 
+// This is working
 int64_t pwm_active_check(alarm_id_t id, void *user_data) {
     // If too much time has passed since the last rising edge and the pin is low, 
         // then the signal must have stopped
@@ -66,10 +67,11 @@ int64_t pwm_active_check(alarm_id_t id, void *user_data) {
     }
     return 0;
 }
-
+// Last rising time is stuck at 0 most of the time
 void pwm_recv_callback(uint gpio, uint32_t events) {
     last_rising_time_us = 0;
     // Disable interrupts on this pin temporarily
+        // Do I need to separately disable the falling edge interrupt as well?
     gpio_set_irq_enabled_with_callback(pwmPinInput, GPIO_IRQ_EDGE_RISE, false, pwm_recv_callback);
     switch(events) {
         case GPIO_IRQ_EDGE_RISE:
@@ -114,10 +116,11 @@ int main() {
     gpio_set_irq_enabled_with_callback(pwmPinInput, GPIO_IRQ_EDGE_RISE, true, pwm_recv_callback);
 
     while(true) {
-        printf("Last pulse width: %d\n", last_pulse_width_us);
+        //printf("Last pulse width: %lld\n", last_pulse_width_us);
+        printf("Last rising time: %lld\n", last_rising_time_us);
         printf(pwm_active ? "Active" : "Not active");
         printf("\n");
-        busy_wait_us(100000);
+        //busy_wait_us(100000);
     }
 
     return 0;
