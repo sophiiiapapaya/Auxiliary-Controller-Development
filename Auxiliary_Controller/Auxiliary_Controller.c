@@ -25,24 +25,36 @@ const uint relay_status_LED_pin = 7; // placeholder value
 bool unresolved_error = false;
 
 // switch on/off pin 6 & 7
-void LED_stat(){
+void LED_stat(unresolved_error){
     // program_status_LED_pin ON by default
-    
+
     // if an error is encoutered, unresolved_error == true
-    while {
-        if (unresolved_error = true)
+        if (!unresolved_error)
         { 
-            // blink program status LED with period=1s 
-            // involve setting up a timer with a separate callback fn
-            gpio_put(program_status_LED_pin, openClose);
-            sleep_ms(500); 
+        // blink program status LED with period=1s 
+        // involve setting up a timer with a separate callback fn
+        gpio_put(program_status_LED_pin, );
+        add_repeating_timer_ms (500, callback, NULL, &timer); 
         }
         else
         {
-        // Timer stops toggling the pin once unresolved error == false
+        // Timer stops toggling (cancel repeating timer fn) the pin once unresolved error == false
+        bool cancelled = cancel_repeating_timer(&timer);
         }
-    }
 
+}
+
+void Led_Test() {
+    while (gpio_get(testingSwitchPin));
+    
+    LED_stat(false); // !unresolved_error
+    printf("LED status set true: %d", false);
+    sleep_ms(5000);
+
+    while (gpio_get(testingSwitchPin));
+
+    LED_stat(true); // unresolved_error
+    printf("LED status set false: %d", true);
 }
 
 // Function definitions here
