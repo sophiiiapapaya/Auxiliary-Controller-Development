@@ -38,7 +38,7 @@ void LED_stat(){
         { 
         // blink program status LED with period=1s 
         // involve setting up a timer with a separate callback fn
-        struct repeating_timer = timer; 
+        struct repeating_timer timer; 
         gpio_put(program_status_LED_pin, 1); 
         add_repeating_timer_ms (500, repeating_timer_callback, NULL, &timer); 
         }
@@ -51,8 +51,11 @@ void LED_stat(){
 }
 
 bool repeating_timer_callback(struct repeating_timer *t){
+    int led_val = 0; 
+    led_val = 1 - led_val; 
+    gpio_put(program_status_LED_pin, led_val);
+    printf("LED toggled.\n"); 
     return true; 
-
 }
 
 void Led_Test() {
