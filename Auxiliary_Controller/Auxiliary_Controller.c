@@ -23,12 +23,13 @@ void Relay_Unit_Test();
 const uint program_status_LED_pin = 6; // placeholder value
 const uint relay_status_LED_pin = 7; // placeholder value
 bool unresolved_error = false;
+int led_val = 0; 
 
 // switch on/off pin 6 & 7
 void LED_stat(){
     gpio_init(program_status_LED_pin); 
     gpio_init(relay_status_LED_pin);
-    gpio_set_dir(program_status_LED_pin, false); 
+    gpio_set_dir(program_status_LED_pin, false);  // true for out, false for in
     gpio_set_dir(relay_status_LED_pin, true);
     // program_status_LED_pin ON by default
     gpio_put(program_status_LED_pin, 1);  
@@ -48,10 +49,11 @@ void LED_stat(){
         bool cancelled = cancel_repeating_timer(&timer);
         }
 
+    gpio_put(relay_status_LED_pin, 1 - relayState); 
+
 }
 
 bool repeating_timer_callback(struct repeating_timer *t){
-    int led_val = 0; 
     led_val = 1 - led_val; 
     gpio_put(program_status_LED_pin, led_val);
     printf("LED toggled.\n"); 
@@ -60,7 +62,33 @@ bool repeating_timer_callback(struct repeating_timer *t){
 
 void Led_Test() {
 
+    //bool timer_callback = repeating_timer_callback(&timer); 
+    while (gpio_get(program_status_LED_pin));
+    
+    unresolved_error = true; 
     LED_stat(); 
+    printf("Program staus LED toggles");
+
+    sleep_ms(500);
+
+    while (gpio_get(program_status_LED_pin));
+        
+    unresolved_error = false; 
+    LED_stat(); 
+    printf("Program status LED is ON");
+    
+
+    
+    while (gpio_get(relay_status_LED_pin));
+
+    Relay_Control(true);
+    printf("Relay staus LED set false: %d", 1 - relayState);
+    sleep_ms(500);
+
+    while (gpio_get(relay_status_LED_pin));
+
+    Relay_Control(false);
+    printf("Relay status LED set true: %d", 1 - relayState);
 }
 
 // Function definitions here
