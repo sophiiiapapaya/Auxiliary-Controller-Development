@@ -54,6 +54,8 @@ const uint pwmPinInput = 27; //This pin is a PWM 2B type
 volatile uint64_t last_rising_time_us;
 volatile uint64_t last_pulse_width_us;
 volatile bool pwm_active;
+volatile bool pwm_error_flag;
+uint32_t last_event;
 
 void pwm_recv_callback(uint gpio, uint32_t events);
 int64_t pwm_measure_complete(alarm_id_t id, void *user_data);
@@ -68,13 +70,22 @@ int64_t pwm_active_check(alarm_id_t id, void *user_data) {
     return 0;
 }
 // Last rising time is stuck at 0 most of the time
+// UPDATE: last_rising_time_us keeps increasing even though both edges are being detected
+    // If pwm_active is checked between a rising edge and a falling edge (mid-pulse), it
+    // is reported as active. If pwm_active is checked between a falling edge and a rising
+    // edge, it is reported as inactive
+// UPDATE: fixed the issue with the active check, but last_pulse_width_us still just
+    // increases
+// UPDATE: Fixed issue with last_pulse_width_us by removing the line setting last_rising_time_us
+    // to zero at the start of pwm_recv_callback
 void pwm_recv_callback(uint gpio, uint32_t events) {
-    last_rising_time_us = 0;
     // Disable interrupts on this pin temporarily
         // Do I need to separately disable the falling edge interrupt as well?
     gpio_set_irq_enabled_with_callback(pwmPinInput, GPIO_IRQ_EDGE_RISE, false, pwm_recv_callback);
+    //gpio_set_irq_enabled(pwmPinInput, 0xFFFFFFFF, false); // This should disable both
     switch(events) {
         case GPIO_IRQ_EDGE_RISE:
+            //printf("R: %lld\n", time_us_64());
             // Set flag to indicate a pwm signal is being received
             if (!pwm_active) {
                 pwm_active = true;
@@ -88,6 +99,7 @@ void pwm_recv_callback(uint gpio, uint32_t events) {
             gpio_set_irq_enabled_with_callback(pwmPinInput, GPIO_IRQ_EDGE_FALL, true, pwm_recv_callback);
             break;
         case GPIO_IRQ_EDGE_FALL:
+            //printf("F: %lld\n", time_us_64());
             // Get the time elapsed since the pulse began
             last_pulse_width_us = time_us_64() - last_rising_time_us;
             if (last_pulse_width_us < MIN_PULSE_WIDTH_US || last_pulse_width_us > MAX_PULSE_WIDTH_US) {
@@ -98,6 +110,8 @@ void pwm_recv_callback(uint gpio, uint32_t events) {
             break;
         default:
             // ERROR
+            pwm_error_flag = true;
+            last_event = events;
             gpio_set_irq_enabled_with_callback(pwmPinInput, GPIO_IRQ_EDGE_RISE, true, pwm_recv_callback);
             break;
     }
@@ -108,21 +122,25 @@ int main() {
     stdio_usb_init();
 
     gpio_init(pwmPinInput);
-    gpio_set_dir(pwmPinInput, false);
+    gpio_set_dir(pwmPinInput, false); // Input
     last_rising_time_us = 0;
     last_pulse_width_us = 0;
     pwm_active = false;
-    // Set interrupt on rising edge
+    pwm_error_flag = false;
+    // Set interrupt on rising edge, have it call the function pwm_recv_callback
     gpio_set_irq_enabled_with_callback(pwmPinInput, GPIO_IRQ_EDGE_RISE, true, pwm_recv_callback);
 
     while(true) {
-        //printf("Last pulse width: %lld\n", last_pulse_width_us);
-        printf("Last rising time: %lld\n", last_rising_time_us);
+        printf("Last pulse width: %lld\n", last_pulse_width_us);
+        //printf("Last rising time: %lld\n", last_rising_time_us);
         printf(pwm_active ? "Active" : "Not active");
         printf("\n");
-        //busy_wait_us(100000);
+        if (pwm_error_flag) {
+            printf("%d\n",last_event);
+            pwm_error_flag = false;
+        }
+        busy_wait_us(100000);
     }
-
     return 0;
 }
 
