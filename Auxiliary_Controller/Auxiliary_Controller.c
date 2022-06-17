@@ -20,47 +20,27 @@ void Relay_Init();
 void Relay_Control(bool openClose);
 void Relay_Unit_Test();
 
-// Code from Isean and Justin
-// Only the PWM B pins can be used as inputs.
-// Results are accurate to within 0.001
-/* float measure_duty_cycle(uint gpio){
-      // Only the PWM B pins can be used as inputs.
-      assert(pwm_gpio_to_channel(gpio) == PWM_CHAN_B);//skips over function if pin is not pwm b 
-      uint slice_num = pwm_gpio_to_slice_num(gpio);// slices are used to measure frequency/duty cycles
-
-      // Count once for every 100 cycles the PWM B input is high
-      pwm_config cfg = pwm_get_default_config();//intitialization
-      pwm_config_set_clkdiv_mode(&cfg, PWM_DIV_B_HIGH);
-      pwm_config_set_clkdiv(&cfg, 100);
-      
-      pwm_init(slice_num, &cfg, false);
-      gpio_set_function(gpio, GPIO_FUNC_PWM);
-
-      pwm_set_enabled(slice_num, true);
-      sleep_ms(10);
-      pwm_set_enabled(slice_num, false);
-      float counting_rate = clock_get_hz(clk_sys) / 100;
-      float max_possible_count = counting_rate * 0.01;
-      return pwm_get_counter(slice_num) / max_possible_count;
-} */
-
 // The default pwm frequency for an AUX channel on the Pixhawk is 50 Hz
-// Pulse width can be between 1000 us and 2000 us
-#define MIN_PULSE_WIDTH_US 1000
-#define MAX_PULSE_WIDTH_US 2000
+// Pulse width can be between 1000 us and 2000 us; a tolerance of 15 
+    // microseconds is included
+#define MIN_PULSE_WIDTH_US (1000 - 15)
+#define MAX_PULSE_WIDTH_US (2000 + 15)
 
 // Needs to be declared globally to be shared by multiple functions
 const uint pwmPinInput = 27; //This pin is a PWM 2B type
+// last_rising_time_us tracks the time in microseconds when the last rising edge was detected
+    // on pin 27
 volatile uint64_t last_rising_time_us;
+// last_pulse_width_us tracks the duration in microseconds of the last complete pulse received
+    // on pin 27
 volatile uint64_t last_pulse_width_us;
+// pwm_active is true while a PWM signal is being applied to pin 27, and switches to false
+    // within 21 milliseconds of the signal stopping 
 volatile bool pwm_active;
+// Serves as a catch-all for errors encountered in the interrupt service routine functions
 volatile bool pwm_error_flag;
-uint32_t last_event;
 
-void pwm_recv_callback(uint gpio, uint32_t events);
-int64_t pwm_measure_complete(alarm_id_t id, void *user_data);
-
-// This is working
+// The alarm callback function which sets the value of pwm_active
 int64_t pwm_active_check(alarm_id_t id, void *user_data) {
     // If too much time has passed since the last rising edge and the pin is low, 
         // then the signal must have stopped
@@ -69,41 +49,41 @@ int64_t pwm_active_check(alarm_id_t id, void *user_data) {
     }
     return 0;
 }
-// Last rising time is stuck at 0 most of the time
-// UPDATE: last_rising_time_us keeps increasing even though both edges are being detected
-    // If pwm_active is checked between a rising edge and a falling edge (mid-pulse), it
-    // is reported as active. If pwm_active is checked between a falling edge and a rising
-    // edge, it is reported as inactive
-// UPDATE: fixed the issue with the active check, but last_pulse_width_us still just
-    // increases
-// UPDATE: Fixed issue with last_pulse_width_us by removing the line setting last_rising_time_us
-    // to zero at the start of pwm_recv_callback
+// The interrupt service routine which sets the value of last_pulse_width_us
+    // Note that gpio stores the pin number that the interrupt occured on and
+    // events stores what kind of change took place on the pin.
+    // If there is ever a need to set an interrupt on another pin, this function
+    // will need to be modified so that the code only runs if the interrupt
+    // occured on pin 27
 void pwm_recv_callback(uint gpio, uint32_t events) {
     // Disable interrupts on this pin temporarily
-        // Do I need to separately disable the falling edge interrupt as well?
-    gpio_set_irq_enabled_with_callback(pwmPinInput, GPIO_IRQ_EDGE_RISE, false, pwm_recv_callback);
-    //gpio_set_irq_enabled(pwmPinInput, 0xFFFFFFFF, false); // This should disable both
+    gpio_set_irq_enabled(pwmPinInput, 0xFFFFFFFF, false);
     switch(events) {
         case GPIO_IRQ_EDGE_RISE:
-            //printf("R: %lld\n", time_us_64());
-            // Set flag to indicate a pwm signal is being received
+            // Set flag to indicate a pwm signal is being received (only if this is
+                // the first pulse of the signal)
             if (!pwm_active) {
                 pwm_active = true;
             }
-            // Save the current time to measure the pulse width
+            // Save the current time to measure the pulse width at the end of the pulse
             last_rising_time_us = time_us_64();
             // Also start a timer that is greater than the period of the PWM signal to
-                // detect if the signal has stopped
+                // detect if the signal has stopped; this will check if the next expected
+                // pulse is received
             add_alarm_in_us(21000, pwm_active_check, NULL, false);
-            // Set interrupt to trigger again on the falling edge of the pulse
+            // Set next interrupt to trigger on the falling edge of the pulse
             gpio_set_irq_enabled_with_callback(pwmPinInput, GPIO_IRQ_EDGE_FALL, true, pwm_recv_callback);
             break;
         case GPIO_IRQ_EDGE_FALL:
-            //printf("F: %lld\n", time_us_64());
             // Get the time elapsed since the pulse began
             last_pulse_width_us = time_us_64() - last_rising_time_us;
+            // If the measured pulse width does not fall within the expected range of values
+                // that the Pixhawk can output, then there is an error. Realistically, there
+                // needs to be a few microseconds of tolerance in the expected range of values
+                // due to the limited accuracy of the Pixhawk's PWM generation. Right now, the
+                // tolerance is 15 microseconds
             if (last_pulse_width_us < MIN_PULSE_WIDTH_US || last_pulse_width_us > MAX_PULSE_WIDTH_US) {
-                // ERROR
+                pwm_error_flag = true;
             }
             // Set interrupt to trigger on the rising edge of the next pulse
             gpio_set_irq_enabled_with_callback(pwmPinInput, GPIO_IRQ_EDGE_RISE, true, pwm_recv_callback);
@@ -111,7 +91,6 @@ void pwm_recv_callback(uint gpio, uint32_t events) {
         default:
             // ERROR
             pwm_error_flag = true;
-            last_event = events;
             gpio_set_irq_enabled_with_callback(pwmPinInput, GPIO_IRQ_EDGE_RISE, true, pwm_recv_callback);
             break;
     }
@@ -121,13 +100,15 @@ int main() {
     stdio_init_all();
     stdio_usb_init();
 
+    // Initialization for receiving PWM signal
     gpio_init(pwmPinInput);
     gpio_set_dir(pwmPinInput, false); // Input
     last_rising_time_us = 0;
     last_pulse_width_us = 0;
     pwm_active = false;
     pwm_error_flag = false;
-    // Set interrupt on rising edge, have it call the function pwm_recv_callback
+    // BEgin waiting for a PWM signal by setting an interrupt on rising edges;
+        // have it call the function pwm_recv_callback
     gpio_set_irq_enabled_with_callback(pwmPinInput, GPIO_IRQ_EDGE_RISE, true, pwm_recv_callback);
 
     while(true) {
@@ -136,9 +117,10 @@ int main() {
         printf(pwm_active ? "Active" : "Not active");
         printf("\n");
         if (pwm_error_flag) {
-            printf("%d\n",last_event);
+            printf("Error in pwm_recv_callback");
             pwm_error_flag = false;
         }
+        // Do not print messages too frequently
         busy_wait_us(100000);
     }
     return 0;
