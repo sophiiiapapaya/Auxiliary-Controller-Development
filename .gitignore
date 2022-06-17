@@ -1,5 +1,4 @@
 Auxiliary_Controller/build/*
 Auxiliary_Controller/pico_sdk_import.cmake
 *.json
-build/*
 .vscode/settings.json
