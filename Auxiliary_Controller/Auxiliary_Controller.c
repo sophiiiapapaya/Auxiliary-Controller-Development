@@ -25,70 +25,82 @@ const uint relay_status_LED_pin = 7; // placeholder value
 bool unresolved_error = false;
 int led_val = 0; 
 
+// Global var || define in main fn and pass a pointer to the add_repeating_timer_ms fn
+// defining before calling add_repeating_timer_ms would remove it from the memory
+struct repeating_timer timer; 
+
 // switch on/off pin 6 & 7
 void LED_stat(){
     gpio_init(program_status_LED_pin); 
     gpio_init(relay_status_LED_pin);
-    gpio_set_dir(program_status_LED_pin, false);  // true for out, false for in
+    gpio_set_dir(program_status_LED_pin, true);  // true for out, false for in
     gpio_set_dir(relay_status_LED_pin, true);
     // program_status_LED_pin ON by default
     gpio_put(program_status_LED_pin, 1);  
+    
+    // Add lines below to check if a timer has been added/active
+    // if true, cancel the existing timer?
+    bool checktimer = add_repeating_timer_ms(); // can i do this here?
+    if (checktimer == true)
+        cancel_repeating_timer(&timer); 
 
-    // if an error is encoutered, unresolved_error == true
-        if (!unresolved_error)
+
+    // if an error encounters, unresolved_error would be set true (line 82)
+    // inverting the value is not needed
+        while (unresolved_error == true) 
         { 
-        // blink program status LED with period=1s 
+        // blink program status LED with period=1s until error resolved
         // involve setting up a timer with a separate callback fn
-        struct repeating_timer timer; 
         gpio_put(program_status_LED_pin, 1); 
         add_repeating_timer_ms (500, repeating_timer_callback, NULL, &timer); 
+        // do I need to check what value it returns?
         }
-        else
-        {
+        
         // Timer stops toggling (cancel repeating timer fn) the pin once unresolved error == false
         bool cancelled = cancel_repeating_timer(&timer);
-        }
+        // Should I put "cancel_repeating_timer(&timer);" instead as in line 4?
+        
 
-    gpio_put(relay_status_LED_pin, 1 - relayState); 
+    gpio_put(relay_status_LED_pin, !relayState); 
 
 }
 
 bool repeating_timer_callback(struct repeating_timer *t){
     led_val = 1 - led_val; 
     gpio_put(program_status_LED_pin, led_val);
-    printf("LED toggled.\n"); 
+    printf("LED toggled.\n"); // for testing purpose only
+    // repeating_timer_callback is being used as an interrupt function
+    // printing anything to the console in an interrupt function can mess with timing
     return true; 
 }
 
 void Led_Test() {
-
-    //bool timer_callback = repeating_timer_callback(&timer); 
-    while (gpio_get(program_status_LED_pin));
+ 
+    // while (gpio_get(program_status_LED_pin));
+    // LED pins are output only, unlike relay control
     
     unresolved_error = true; 
     LED_stat(); 
     printf("Program staus LED toggles");
 
-    sleep_ms(500);
+    // set a longer delay for easier testing
+    sleep_ms(1000);
 
-    while (gpio_get(program_status_LED_pin));
-        
+    // while (gpio_get(program_status_LED_pin));
     unresolved_error = false; 
     LED_stat(); 
     printf("Program status LED is ON");
     
 
-    
-    while (gpio_get(relay_status_LED_pin));
+    // Relay_Control(true);
+    // modify relayState directly when testing
+    relayState = true; 
+    printf("Relay staus LED set OFF: %d", !relayState); // was "1 - relayState"
+    sleep_ms(1000);
 
-    Relay_Control(true);
-    printf("Relay staus LED set false: %d", 1 - relayState);
-    sleep_ms(500);
 
-    while (gpio_get(relay_status_LED_pin));
-
-    Relay_Control(false);
-    printf("Relay status LED set true: %d", 1 - relayState);
+    relayState = false; 
+    printf("Relay status LED set ON: %d", !relayState);
 }
 
 // Function definitions here
