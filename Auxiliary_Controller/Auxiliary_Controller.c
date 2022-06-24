@@ -1,5 +1,6 @@
 // When including header files from the SDK, make sure you add the corresponding entry to the target_link_libraries list in CMakeLists.txt
 #include <stdio.h>
+#include <time.h>
 #include "pico/stdlib.h"
 #include "hardware/gpio.h"
 #include "hardware/pio.h"
@@ -37,28 +38,59 @@ void LED_stat(){
     gpio_set_dir(relay_status_LED_pin, true);
     // program_status_LED_pin ON by default
     gpio_put(program_status_LED_pin, 1);  
+
+    /*
+    <Jeremy> check both whether the timer is already active
+    and whether it needs to be active (based on the variable unresolved_error).
+    If it needs to be active and it already is, then nothing needs to be done.
+    If it needs to be active and it is not, then call add_repeating_timer_ms.
+    If it needs to not be active and it is active, then call cancel_repeating_timer.
+    If it needs to not be active and it is not active, then nothing needs to be done.
+    */
+
+    /*
+    <Jeremy> The function add_repeating_timer_ms returns true or false depending on
+    whether there were enough hardware resources available to create the timer;
+    it cannot determine whether the timer has already been initialized. In order
+    to check whether the timer is active you need to look at the timer object
+    itself (in this case, the object named timer). I think that the alarm ID can
+    be used to determine this but you will need to confirm by checking if the 
+    value gets reset when the repeating timer is cancelled. (see here: https://raspberrypi.github.io/pico-sdk-doxygen/structrepeating__timer.html)
+    */
     
-    // Add lines below to check if a timer has been added/active
-    // if true, cancel the existing timer?
-    bool checktimer = add_repeating_timer_ms(); // can i do this here?
-    if (checktimer == true)
-        cancel_repeating_timer(&timer); 
+    // is an alarm and a timer referring to the same thing
 
+    // check if var timer is active
+    // if a timer exist (how?), get the value of the timer to check if it is active
+    if (timer != NULL) // check if timer exists 
+    {
+        // bool checktimer >> timer active/inactive
 
-    // if an error encounters, unresolved_error would be set true (line 82)
+    }
+
     // inverting the value is not needed
-        while (unresolved_error == true) 
-        { 
+    if (unresolved_error == true) 
+    { 
         // blink program status LED with period=1s until error resolved
         // involve setting up a timer with a separate callback fn
-        gpio_put(program_status_LED_pin, 1); 
-        add_repeating_timer_ms (500, repeating_timer_callback, NULL, &timer); 
-        // do I need to check what value it returns?
+
+        // if there's no active timer, add a timer
+        if (checktimer != true)
+        {
+            add_repeating_timer_ms (500, repeating_timer_callback, NULL, &timer); 
+            // do I need to check what value it returns?
         }
-        
+    }
+    else
+    {
         // Timer stops toggling (cancel repeating timer fn) the pin once unresolved error == false
         bool cancelled = cancel_repeating_timer(&timer);
-        // Should I put "cancel_repeating_timer(&timer);" instead as in line 4?
+        // Should I put only "cancel_repeating_timer(&timer);" instead as in line 4 so it cancels the timer 
+        // rather than getting the value?
+
+        // Program status LED ON once it stops toggling
+        gpio_put(program_status_LED_pin, 1); 
+    }
         
 
     gpio_put(relay_status_LED_pin, !relayState); 
@@ -75,29 +107,25 @@ bool repeating_timer_callback(struct repeating_timer *t){
 }
 
 void Led_Test() {
- 
     // while (gpio_get(program_status_LED_pin));
     // LED pins are output only, unlike relay control
     
     unresolved_error = true; 
     LED_stat(); 
     printf("Program staus LED toggles");
-
     // set a longer delay for easier testing
     sleep_ms(1000);
 
-    // while (gpio_get(program_status_LED_pin));
     unresolved_error = false; 
     LED_stat(); 
     printf("Program status LED is ON");
     
-
+    // -----------------------
     // Relay_Control(true);
     // modify relayState directly when testing
     relayState = true; 
-    printf("Relay staus LED set OFF: %d", !relayState); // was "1 - relayState"
+    printf("Relay staus LED set OFF: %d", !relayState);
     sleep_ms(1000);
-
 
     relayState = false; 
     printf("Relay status LED set ON: %d", !relayState);
