@@ -57,6 +57,9 @@ void LED_stat(){
     be used to determine this but you will need to confirm by checking if the 
     value gets reset when the repeating timer is cancelled. (see here: https://raspberrypi.github.io/pico-sdk-doxygen/structrepeating__timer.html)
     */
+
+   //see p206, lines 25-28
+   // p251 4.2 cancel_alarm
     
     // is an alarm and a timer referring to the same thing
 
@@ -80,13 +83,17 @@ void LED_stat(){
             add_repeating_timer_ms (500, repeating_timer_callback, NULL, &timer); 
             // do I need to check what value it returns?
         }
+
+        // Implement error handling
     }
     else
     {
-        // Timer stops toggling (cancel repeating timer fn) the pin once unresolved error == false
-        bool cancelled = cancel_repeating_timer(&timer);
-        // Should I put only "cancel_repeating_timer(&timer);" instead as in line 4 so it cancels the timer 
-        // rather than getting the value?
+        if (checktimer == true)
+        {
+            // Timer stops toggling (cancel repeating timer fn) the pin once unresolved error == false
+            bool cancelled = cancel_repeating_timer(&timer);
+        }
+        
 
         // Program status LED ON once it stops toggling
         gpio_put(program_status_LED_pin, 1); 
@@ -101,8 +108,7 @@ bool repeating_timer_callback(struct repeating_timer *t){
     led_val = 1 - led_val; 
     gpio_put(program_status_LED_pin, led_val);
     printf("LED toggled.\n"); // for testing purpose only
-    // repeating_timer_callback is being used as an interrupt function
-    // printing anything to the console in an interrupt function can mess with timing
+    // printing lines slows down the code
     return true; 
 }
 
