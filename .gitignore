@@ -1,4 +1,5 @@
 Auxiliary_Controller/build/*
+build/*
 Auxiliary_Controller/pico_sdk_import.cmake
 *.json
 build/CMakeCache.txt

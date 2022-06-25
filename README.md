@@ -5,7 +5,7 @@ These directions assume you have performed the toolchain installation in chapter
 # Preparing the SDK
 1. After cloning/downloading this repository to your computer, download the pico SDK [here](https://github.com/raspberrypi/pico-sdk) and place it in a separate directory
 2. Within the pico SDK, go to the external folder and copy the file pico_sdk_import to the Auxiliary_Controller folder in this repository
-3. At the top of the file you copied, add the following line, where "path-to-sdk" is replaced by the full absolute path to wherever you are storing the pico SDK on your computer (keep the quotation marks):  
+3. At the top of the file you copied, add the following line, where "path-to-sdk" is replaced by the full absolute path to wherever you are storing the pico SDK on your computer (keep the quotation marks, and use forward slashes):  
     set(PICO_SDK_PATH "path-to-sdk")
 
 # Directions for Building Code
